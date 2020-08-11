@@ -1,4 +1,5 @@
 const imgLocation = 'img/mountain.png'
+const chartFile = 'out_mountain.png'
 // how many pixels per grid square
 const res = 50
 // how many pixels per square in original image
@@ -6,6 +7,7 @@ const imgRes = 7
 const gridColor = 0
 
 let img
+let canvas
 const margin = 30
 let legendItemWidth = res * 10
 let legendItemHeight = res + 20
@@ -24,7 +26,7 @@ function setup () {
   gridHeight = img.height / imgRes
 
   populateLegend()
-  createCanvas(2 * margin + gridWidth * res, 2 * margin + gridHeight * res + legendHeight)
+  canvas = createCanvas(2 * margin + gridWidth * res, 2 * margin + gridHeight * res + legendHeight)
   img.loadPixels()
 }
 
@@ -52,6 +54,7 @@ function draw () {
   drawGrid()
   pop()
 
+  save(canvas, chartFile)
   noLoop()
 }
 
