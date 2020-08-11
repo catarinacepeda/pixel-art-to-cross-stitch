@@ -2,15 +2,17 @@
 const res = 50
 // how many pixels per square in original image
 const imgRes = 7
+const gridColor = 0
 
 let img
 const margin = 30
-let legendItemWidth = 300
-let legendItemHeight = 50
+let legendItemWidth = res * 10
+let legendItemHeight = res + 20
 let legendHeight
 let gridWidth
 let gridHeight
 let legend = {}
+let legendColors
 
 function preload () {
   img = loadImage('img/mountain.png')
@@ -38,7 +40,12 @@ function draw () {
   translate(margin, margin + legendHeight)
   for (let y = 0; y < gridHeight; y++) {
     for (let x = 0; x < gridWidth; x++) {
-      drawSquare(x, y)
+      push()
+      translate(x * res, y * res)
+      noStroke()
+      const c = color(img.get(x * imgRes, y * imgRes)).toString('#rrggbb')
+      drawSquare(c)
+      pop()
     }
   }
   drawGrid()
@@ -47,18 +54,30 @@ function draw () {
   noLoop()
 }
 
-function drawSquare (x, y) {
-  const c = img.get(x * imgRes, y * imgRes)
+function drawSquare (hexColor) {
+  fill(hexColor)
+  rect(0, 0, res - 1, res - 1)
+  const colorIndex = legendColors.indexOf(hexColor) + 1
+  push()
+  translate(res / 2, res / 2)
+  textAlign(CENTER, CENTER)
+  textSize(res / 2)
+  rectMode(CENTER)
+  const { levels: c } = color(hexColor)
+  // http://www.w3.org/TR/AERT#color-contrast
+  const brightness = Math.round(
+    ((parseInt(c[0]) * 299) +
+    (parseInt(c[1]) * 587) +
+    (parseInt(c[2]) * 114)) / 1000
+  )
+  fill(brightness > 125 ? 0 : 255)
   noStroke()
-  fill(c)
-  const canvasX = x * res
-  const canvasY = y * res
-
-  rect(canvasX, canvasY, res - 1, res - 1)
+  text(String(colorIndex), 0, 0)
+  pop()
 }
 
 function drawGrid () {
-  stroke(0)
+  stroke(gridColor)
   noFill()
   // horizontal lines
   for (let y = 0; y <= gridHeight; y++) {
@@ -89,18 +108,21 @@ function populateLegend () {
       legend[hexColor]++
     }
   }
+  legendColors = Object.keys(legend)
   const numColors = Object.keys(legend).length
   const numLegendRows = ceil(numColors * legendItemWidth / (gridWidth * res))
   legendHeight = numLegendRows * (legendItemHeight + margin)
 }
 
 function drawLegend (legend) {
-  let count = 0
+  let count = 1
+  let rowIndex = 0
   let xoff = 0
   let yoff = 0
   for (const hexColor in legend) {
-    const rectWidth = legendItemWidth / 5
+    const rectWidth = legendItemHeight * 3 / 2
     push()
+    // draw color swatch
     translate(xoff, yoff)
     fill(hexColor)
     noStroke()
@@ -108,21 +130,32 @@ function drawLegend (legend) {
     stroke(0)
     noFill()
     rect(0, 0, legendItemWidth, legendItemHeight)
-      push()
-      translate(rectWidth + 5, legendItemHeight / 2)
-      fill(0)
-      noStroke()
-      textSize(legendItemHeight / 3)
-      textAlign(LEFT, BOTTOM)
-      text(hexColor, 0, 0)
-      textAlign(LEFT, TOP)
-      text(`${legend[hexColor]} squares`, 0, 0)
-      pop()
+
+    // draw legend text
+    push()
+    translate(rectWidth + ceil(res / 5), legendItemHeight / 2)
+    fill(0)
+    noStroke()
+    textSize(legendItemHeight / 3)
+    textAlign(LEFT, BOTTOM)
+    text(hexColor, 0, 0)
+    textAlign(LEFT, TOP)
+    text(`${legend[hexColor]} squares`, 0, 0)
     pop()
+
+    // draw grid square
+    push()
+    pop()
+    translate(legendItemWidth - res - (legendItemHeight - res) / 2, (legendItemHeight - res) / 2)
+    stroke(0)
+    strokeWeight(ceil(res / 10))
+    drawSquare(hexColor)
+    pop()
+    rowIndex++
     count++
     xoff += legendItemWidth
-    if ((count + 1) * legendItemWidth > gridWidth * res) {
-      count = 0
+    if ((rowIndex + 1) * legendItemWidth > gridWidth * res) {
+      rowIndex = 0
       xoff = 0
       yoff += legendItemHeight + margin
     }
