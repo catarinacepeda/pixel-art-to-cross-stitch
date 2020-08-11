@@ -1,3 +1,4 @@
+const imgLocation = 'img/mountain.png'
 // how many pixels per grid square
 const res = 50
 // how many pixels per square in original image
@@ -15,7 +16,7 @@ let legend = {}
 let legendColors
 
 function preload () {
-  img = loadImage('img/mountain.png')
+  img = loadImage(imgLocation)
 }
 
 function setup () {
