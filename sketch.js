@@ -1,16 +1,16 @@
 const imgLocation = 'img/mountain.png'
 const chartFile = 'out_mountain.png'
 // how many pixels per grid square
-const res = 50
+const res = 25
 // how many pixels per square in original image
 const imgRes = 7
 const gridColor = 0
 
 let img
 let canvas
-const margin = 30
+const margin = res * 1.5
 let legendItemWidth = res * 10
-let legendItemHeight = res + 20
+let legendItemHeight = res * 2
 let legendHeight
 let gridWidth
 let gridHeight
@@ -24,6 +24,7 @@ function preload () {
 function setup () {
   gridWidth = img.width / imgRes
   gridHeight = img.height / imgRes
+  console.log(gridWidth, gridHeight)
 
   populateLegend()
   canvas = createCanvas(2 * margin + gridWidth * res, 2 * margin + gridHeight * res + legendHeight)
@@ -54,13 +55,13 @@ function draw () {
   drawGrid()
   pop()
 
-  save(canvas, chartFile)
+  // save(canvas, chartFile)
   noLoop()
 }
 
 function drawSquare (hexColor) {
   fill(hexColor)
-  rect(0, 0, res - 1, res - 1)
+  rect(0, 0, res, res)
   const colorIndex = legendColors.indexOf(hexColor) + 1
   push()
   translate(res / 2, res / 2)
@@ -115,11 +116,10 @@ function populateLegend () {
   legendColors = Object.keys(legend)
   const numColors = Object.keys(legend).length
   const numLegendRows = ceil(numColors * legendItemWidth / (gridWidth * res))
-  legendHeight = numLegendRows * (legendItemHeight + margin)
+  legendHeight = numLegendRows * (legendItemHeight + res)
 }
 
 function drawLegend (legend) {
-  let count = 1
   let rowIndex = 0
   let xoff = 0
   let yoff = 0
@@ -140,7 +140,7 @@ function drawLegend (legend) {
     translate(rectWidth + ceil(res / 5), legendItemHeight / 2)
     fill(0)
     noStroke()
-    textSize(legendItemHeight / 3)
+    textSize(res / 2)
     textAlign(LEFT, BOTTOM)
     text(hexColor, 0, 0)
     textAlign(LEFT, TOP)
@@ -149,19 +149,18 @@ function drawLegend (legend) {
 
     // draw grid square
     push()
-    pop()
     translate(legendItemWidth - res - (legendItemHeight - res) / 2, (legendItemHeight - res) / 2)
     stroke(0)
     strokeWeight(ceil(res / 10))
     drawSquare(hexColor)
     pop()
+    pop()
     rowIndex++
-    count++
     xoff += legendItemWidth
     if ((rowIndex + 1) * legendItemWidth > gridWidth * res) {
       rowIndex = 0
       xoff = 0
-      yoff += legendItemHeight + margin
+      yoff += legendItemHeight + res
     }
   }
 }
